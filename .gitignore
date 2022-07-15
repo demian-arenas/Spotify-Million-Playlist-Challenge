@@ -90,4 +90,6 @@ target/
 .pytest_cache/
 
 # Data
-data/
+data/raw/
+data/processed/
+data/final/
