@@ -27,6 +27,22 @@ def process_tracks_to_playlist_data(track, playlist_id):
     return [unique_playlist_trackorder_id, playlist_id, track_id]
 
 
+def process_tracks_to_set_tracks(track):
+    """
+    Process the track song data to add the Spotify Song id and delete playlist order position.
+
+    Args:
+        track (dict): Song data of the Spotify Challenge Dataset
+    Returns:
+        Track (dict): Track song dict with the Spotify unique track song id
+    """
+    track_id = track['track_uri'][14:]
+    del track['pos']
+    track['track_id'] = track_id
+
+    return track
+
+
 if __name__ == '__main__':
     # get the start time
     start_time = time.time()
