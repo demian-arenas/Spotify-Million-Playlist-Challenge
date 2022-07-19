@@ -43,6 +43,45 @@ def process_tracks_to_set_tracks(track):
     return track
 
 
+def process_playlist(playlist):
+    """
+    Clean each playlist dict extracting the tracks key. 
+    Then process tracks to generate the unique_tracks and track_playlist relation datasets.
+
+    Args:
+        playlist (dict): Playlist dict of the Spotify Challenge Dataset
+    Returns:
+        (dict): {
+            playlist_tracks (pd.DataFrame): DataFrame with the track/playlist relation,
+            unique_tracks (pd.DataFrame): DataFrame with the uniques tracks,
+            playlist (dict): Playlist dict without the tracks section.
+        }
+    """
+    unique_tracks_columns = ["artist_name", "track_uri", "artist_uri",
+                             "track_name", "album_uri", "duration_ms", "album_name", 'track_id']
+    track_to_playlist_columns = [
+        'unique_playlist_trackorder_id', 'playlist_id', 'track_id']
+
+    playlist_id = playlist['pid']
+    tracks_in_playlist = playlist['tracks']
+    del playlist['tracks']
+
+    tracks_to_playlist_data = [process_tracks_to_playlist_data(
+        track=track, playlist_id=playlist_id) for track in tracks_in_playlist]
+    playlist_tracks = pd.DataFrame(
+        data=tracks_to_playlist_data, columns=track_to_playlist_columns)
+
+    processed_unique_tracks = [process_tracks_to_set_tracks(
+        track=track) for track in tracks_in_playlist]
+    unique_tracks = pd.DataFrame(
+        data=processed_unique_tracks, columns=unique_tracks_columns)
+    return {
+        'playlist_tracks': playlist_tracks,
+        'unique_tracks': unique_tracks,
+        'playlist': playlist
+    }
+
+
 if __name__ == '__main__':
     # get the start time
     start_time = time.time()
