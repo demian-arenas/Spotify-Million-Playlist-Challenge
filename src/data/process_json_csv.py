@@ -82,6 +82,44 @@ def process_playlist(playlist):
     }
 
 
+def process_slice(slice_dir):
+    """
+    Process each slice of the Spotify Challenge Dataset.
+
+    Args:
+        slice_dir (str): Slice file name
+    Returns:
+        (dict): {
+            playlist_tracks (list [pd.DataFrame]): List of DataFrames with the track/playlist relation,
+            unique_tracks (list [pd.DataFrame]): List of DataFrames with the uniques tracks,
+            playlist (pd.DataFrame): DataFrame with the slice playlists without the tracks section.
+        }
+    """
+    slice_playlists = []
+    slice_unique_tracks = []
+    slice_track_to_playlist = []
+
+    slice_dir = f"data/raw/{slice_dir}"
+
+    file_json_slice = open(slice_dir)
+    json_slice = json.load(file_json_slice)
+
+    playlists = json_slice['playlists']
+    for playlist in playlists:
+        processed_datasets = process_playlist(playlist=playlist)
+        slice_playlists.append(processed_datasets['playlist'])
+        slice_unique_tracks.append(processed_datasets['unique_tracks'])
+        slice_track_to_playlist.append(processed_datasets['playlist_tracks'])
+
+    playlists_processed = pd.DataFrame(
+        data=slice_playlists, columns=slice_playlists[0].keys())
+    return {
+        'playlist_tracks': slice_track_to_playlist,
+        'unique_tracks': slice_unique_tracks,
+        'playlist': playlists_processed
+    }
+
+
 if __name__ == '__main__':
     # get the start time
     start_time = time.time()
