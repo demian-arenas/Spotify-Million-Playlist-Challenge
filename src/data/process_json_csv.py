@@ -120,11 +120,54 @@ def process_slice(slice_dir):
     }
 
 
+def process_json_data():
+    """
+    Process all files of the Spotify Challenge Dataset.
+    Process the files in seven batches. Each batch will generate the following CSV:
+        tracks_to_playlist_batch_{number_batch}: Track/Playlist relation
+        playlist_batch_{number_batch}: Playlist data
+        unique_tracks_batch_{number_batch}: Unique Tracks data
+    """
+    mpd_slices_dir = os.listdir("data/raw/")
+    batches_slices = np.array_split(mpd_slices_dir, 7)
+
+    for index_batch in range(len(batches_slices)):
+        batch_playlists = []
+        batch_unique_tracks = []
+        batch_track_to_playlist = []
+        processed_batch_dir = "data/processed/"
+        print(f'Starting with batch number {index_batch}')
+        for slice in batches_slices[index_batch]:
+            processed_slice = process_slice(slice_dir=slice)
+            batch_playlists.append(processed_slice['playlist'])
+            batch_unique_tracks.append(processed_slice['unique_tracks'])
+            batch_track_to_playlist.append(processed_slice['playlist_tracks'])
+
+        batch_playlists = [
+            slices_playlists for slices_playlists in batch_playlists]
+        batch_playlists = [
+            slices_playlists for slices_playlists in batch_playlists]
+        batch_unique_tracks = [
+            tracks for slices_tracks in batch_unique_tracks for tracks in slices_tracks]
+        batch_track_to_playlist = [
+            track_to_playlist for slices_track_playlist in batch_track_to_playlist for track_to_playlist in slices_track_playlist]
+
+        pd.concat(batch_unique_tracks).drop_duplicates().to_csv(
+            f'{processed_batch_dir}unique_tracks_batch_{index_batch}.csv', index=False)
+        pd.concat(batch_track_to_playlist).to_csv(
+            f'{processed_batch_dir}tracks_to_playlist_batch_{index_batch}.csv', index=False)
+        pd.concat(batch_playlists).to_csv(
+            f'{processed_batch_dir}playlist_batch_{index_batch}.csv', index=False)
+
+        print(f'Finished batch number {index_batch}')
+
+
 if __name__ == '__main__':
     # get the start time
     start_time = time.time()
     start_process_time = time.process_time()
 
     print('Started processing files')
+    process_json_data()
     print('Finished processing files')
     print_current_execution_time(start_time, start_process_time)
